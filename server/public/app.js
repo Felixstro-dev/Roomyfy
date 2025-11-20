@@ -29,6 +29,11 @@ function enterRoom(e) {
             room: chatRoom.value
         })
     }
+    const li = document.createElement('li');
+    li.classList.add('post__connect');
+    li.innerHTML = `<div class="post__text--connect">Connected to: ${chatRoom.value}</div>`;
+    chatDisplay.appendChild(li);
+
 }
 
 document.querySelector('.form-msg')
@@ -43,29 +48,40 @@ msgInput.addEventListener('keypress', () => {
 
 // Listen for messages 
 socket.on("message", (data) => {
-    activity.textContent = ""
-    const { name, text, time } = data
-    const li = document.createElement('li')
-    li.className = 'post'
-    if (name === nameInput.value) li.className = 'post post--left'
-    if (name !== nameInput.value && name !== 'Admin') li.className = 'post post--right'
-    if (name !== 'Admin') {
-        li.innerHTML = `<div class="post__header ${name === nameInput.value
-            ? 'post__header--user'
-            : 'post__header--reply'
-            }">
-        <span class="post__header--name">${name}</span> 
-        <span class="post__header--time">${time}</span> 
-        </div>
-        <div class="post__text">${text}</div>`
-    } else {
-        li.innerHTML = `<div class="post__text">${text}</div>`
+    activity.textContent = ""; // clear typing indicator
+    const { name, text, time } = data;
+
+    const li = document.createElement('li');
+    li.classList.add('post');
+
+    const isAdminMessage = name === 'system-messages-normal-user-unclaimable'; // assumes ADMIN is defined in your client JS
+    const isOwnMessage = name === nameInput.value;
+
+    // Determine post alignment
+    if (isOwnMessage) {
+        li.classList.add('post--right');
+    } else if (!isAdminMessage) {
+        li.classList.add('post--left');
     }
-    document.querySelector('.chat-display').appendChild(li)
 
-    chatDisplay.scrollTop = chatDisplay.scrollHeight
-})
+    // Build inner HTML
+    if (!isAdminMessage) {
+        const headerClass = isOwnMessage ? 'post__header--user' : 'post__header--reply';
+        li.innerHTML = `
+            <div class="post__header ${headerClass}">
+                <span class="post__header--name">${name}</span>
+                <span class="post__header--time">${time}</span>
+            </div>
+            <div class="post__text">${text}</div>
+        `;
+    } else {
+        li.innerHTML = `<div class="post__text">${text}</div>`;
+    }
 
+    chatDisplay.appendChild(li);
+    chatDisplay.scrollTop = chatDisplay.scrollHeight; // scroll to bottom
+});
+//check is typing
 let activityTimer
 socket.on("activity", (name) => {
     activity.textContent = `${name} is typing...`
@@ -81,9 +97,9 @@ socket.on('userList', ({ users }) => {
     showUsers(users)
 })
 
-socket.on('roomList', ({ rooms }) => {
+/* socket.on('roomList', ({ rooms }) => {
     showRooms(rooms)
-})
+}) */
 
 function showUsers(users) {
     usersList.textContent = ''
@@ -98,7 +114,7 @@ function showUsers(users) {
     }
 }
 
-function showRooms(rooms) {
+/* function showRooms(rooms) {
     roomList.textContent = ''
     if (rooms) {
         roomList.innerHTML = '<em>Active Rooms:</em>'
@@ -109,4 +125,4 @@ function showRooms(rooms) {
             }
         })
     }
-}
+} */

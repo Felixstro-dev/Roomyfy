@@ -44,7 +44,7 @@ button {
 }
 
 .chat-display {
-    background-color: #333;
+    background-color: #363636;
     list-style-type: none;
     width: 100%;
     max-width: 600px;
@@ -59,7 +59,7 @@ button {
 }
 
 .post {
-    background-color: #eee;
+    background-color: #dfdfdf;
     border-radius: 10px;
     padding: 0 0 .25rem;
     margin: .5rem;
@@ -78,7 +78,7 @@ button {
 }
 
 .post__header {
-    color: #979696;
+    color: #dfdfdf;
     padding: .25rem .5rem;
     display: flex;
     justify-content: space-between;
@@ -87,11 +87,11 @@ button {
 }
 
 .post__header--user {
-    background-color: rgb(4, 226, 123);
+    background-color: rgb(30, 128, 87);
 }
 
 .post__header--reply {
-    background-color: rgb(197, 194, 13);
+    background-color: rgb(43, 109, 163);
 }
 
 .post__header--name {
@@ -107,6 +107,22 @@ button {
     color: #333;
     padding: .25rem .5rem;
 }
+
+.post__connect {
+    background-color: #72dd9b;
+    border-radius: 10px;
+    padding: 0 0 .25rem;
+    margin: .5rem;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.post__text--connect {
+    margin-top: 5px;
+    color: #333;
+    padding: .25rem .5rem;
+}
+
 
 .user-list,
 .room-list {
@@ -125,15 +141,15 @@ button {
 }
 
 .room-list:hover {
-    border-color: lime;
-    border-style: solid;
-    border-width: 2px;
+    outline-color: rgb(136, 136, 136);
+    outline-style: solid;
+    outline-width: 2px;
     
 }
 .user-list:hover {
-    border-color: lime;
-    border-style: solid;
-    border-width: 2px;
+    outline-color: rgb(153, 153, 153);
+    outline-style: solid;
+    outline-width: 2px;
 }
 .activity {
     width: 100%;
@@ -147,5 +163,26 @@ button {
 .activity {
     font-style: italic;
     border-radius: 10px;
+
+}
+
+.reconnect {
+  background: #FF4742;
+  border: 1px solid #FF4742;
+  border-radius: 6px;
+  box-sizing: border-box;
+  border: 2px solid gray;
+  color: #FFFFFF;
+  cursor: pointer;
+  display: inline-block;
+  font-family: nunito,roboto,proxima-nova,"proxima nova",sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 16px;
+  min-height: 40px;
+  outline: 0;
+  padding: 12px 14px;
+  text-align: center;
+  margin: 1rem auto;
 
 }
