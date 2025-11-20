@@ -1,4 +1,5 @@
-const socket = io('ws://https://roomyfy.onrender.com/')
+const socket = io(window.location.origin);
+
 
 const msgInput = document.querySelector('#message')
 const nameInput = document.querySelector('#name')
