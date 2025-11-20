@@ -33,7 +33,10 @@ function enterRoom(e) {
     li.classList.add('post__connect');
     li.innerHTML = `<div class="post__text--connect">Connected to: ${chatRoom.value}</div>`;
     chatDisplay.appendChild(li);
-
+    document.getElementById("join").disabled = true;
+    setTimeout(() => {
+      document.getElementById("join").disabled = false;
+    }, 4000);
 }
 
 document.querySelector('.form-msg')
@@ -79,14 +82,13 @@ socket.on("message", (data) => {
     }
 
     chatDisplay.appendChild(li);
-    chatDisplay.scrollTop = chatDisplay.scrollHeight; // scroll to bottom
+    chatDisplay.scrollTop = chatDisplay.scrollHeight;
 });
-//check is typing
+
+
 let activityTimer
 socket.on("activity", (name) => {
     activity.textContent = `${name} is typing...`
-
-    // Clear after 3 seconds 
     clearTimeout(activityTimer)
     activityTimer = setTimeout(() => {
         activity.textContent = ""
@@ -96,10 +98,6 @@ socket.on("activity", (name) => {
 socket.on('userList', ({ users }) => {
     showUsers(users)
 })
-
-/* socket.on('roomList', ({ rooms }) => {
-    showRooms(rooms)
-}) */
 
 function showUsers(users) {
     usersList.textContent = ''
@@ -113,16 +111,3 @@ function showUsers(users) {
         })
     }
 }
-
-/* function showRooms(rooms) {
-    roomList.textContent = ''
-    if (rooms) {
-        roomList.innerHTML = '<em>Active Rooms:</em>'
-        rooms.forEach((room, i) => {
-            roomList.textContent += ` ${room}`
-            if (rooms.length > 1 && i !== rooms.length - 1) {
-                roomList.textContent += ","
-            }
-        })
-    }
-} */

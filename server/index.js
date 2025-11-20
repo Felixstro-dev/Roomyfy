@@ -39,10 +39,11 @@ io.on('connection', socket => {
     socket.emit('message', buildMsg('SYSTEM_HELPER', "Enter a name and chatroom to chat with people"));
 
     socket.on('enterRoom', ({ name, room }) => {
-
-        const prohibitedNames = ['SYSTEM', 'SYSTEM_HELPER', 'ADMIN', 'MODERATOR', 'SERVER', 'OWNER', 'DEV', 'DEVELOPER'];
-        if (prohibitedNames.includes(name.toUpperCase())) {
-            socket.emit('message', buildMsg(ADMIN, `The name "${name}" is reserved. Please choose another name.`));
+        
+        const prohibitedNames = ['SYSTEM', 'SYSTEM_HELPER', 'ADMIN', 'MODERATOR', 'SERVER', 'OWNER', 'DEV', 'DEVELOPER', 'BOT', 'NULL', 'MANAGER', 'TEAM', 'STAFF', 'ADMINISTRATOR', 'SERVERBOT'];
+        const cleanName = name.trim().toUpperCase();
+        if (prohibitedNames.some(word => cleanName.includes(word))) {
+            socket.emit('message', buildMsg(ADMIN, `The name "${name}" is reserved or blacklisted. \n Please choose another name.`));
             return;
         }
 
@@ -87,6 +88,7 @@ io.on('connection', socket => {
     socket.on('disconnect', () => {
         const user = getUser(socket.id);
         userLeavesApp(socket.id);
+        buildMsg(ADMIN, `You have disconnected from the room`)
 
         if (user) {
             io.to(user.room).emit('message', buildMsg(ADMIN, `${user.name} has left the room`));
