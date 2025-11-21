@@ -110,6 +110,9 @@ button {
 
 .post__text--admin {
     background-color: #a3a3a3;
+    margin-top: 5px;
+    color: #333;
+    padding: .25rem .5rem;
 }
 
 .post__connect {
