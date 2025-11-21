@@ -78,7 +78,8 @@ socket.on("message", (data) => {
             <div class="post__text">${text}</div>
         `;
     } else {
-        li.innerHTML = `<div class="post__text--admin">${text}</div>`;
+        li.classList.add('post__system')
+        li.innerHTML = `<div class="post__text--system">${text}</div>`;
     }
 
     chatDisplay.appendChild(li);

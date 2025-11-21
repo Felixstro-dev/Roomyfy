@@ -108,7 +108,15 @@ button {
     padding: .25rem .5rem;
 }
 
-.post__text--admin {
+.post__system {
+    background-color: #a3a3a3;
+    margin: .5rem;
+    border-radius: 10px;
+    overflow: hidden;
+    padding: 0 0 .25rem;
+    flex-shrink: 0;
+}
+.post__text--system {
     background-color: #a3a3a3;
     margin-top: 5px;
     color: #333;
