@@ -49,25 +49,22 @@ msgInput.addEventListener('keypress', () => {
     socket.emit('activity', nameInput.value)
 })
 
-// Listen for messages 
 socket.on("message", (data) => {
-    activity.textContent = ""; // clear typing indicator
+    activity.textContent = "";
     const { name, text, time } = data;
 
     const li = document.createElement('li');
     li.classList.add('post');
 
-    const isAdminMessage = name === 'system-messages-normal-user-unclaimable'; // assumes ADMIN is defined in your client JS
+    const isAdminMessage = name === 'system-messages-normal-user-unclaimable';
     const isOwnMessage = name === nameInput.value;
 
-    // Determine post alignment
     if (isOwnMessage) {
         li.classList.add('post--right');
     } else if (!isAdminMessage) {
         li.classList.add('post--left');
     }
 
-    // Build inner HTML
     if (!isAdminMessage) {
         const headerClass = isOwnMessage ? 'post__header--user' : 'post__header--reply';
         li.innerHTML = `
@@ -86,14 +83,28 @@ socket.on("message", (data) => {
     chatDisplay.scrollTop = chatDisplay.scrollHeight;
 });
 
+const typingUsers = new Set();
 
-let activityTimer
 socket.on("activity", (name) => {
-    activity.textContent = `${name} is typing...`
-    clearTimeout(activityTimer)
-    activityTimer = setTimeout(() => {
-        activity.textContent = ""
-    }, 3000)
+    typingUsers.add(name);
+
+    if (typingUsers.size === 0) {
+        activity.textContent = "";
+    } else if (typingUsers.size === 1) {
+        activity.textContent = `${name} is typing...`
+    } else {
+        activity.textContent = `${typingUsers.join(", ")} are typing...`;
+    }
+
+    setTimeout(() => {
+        if (typingUsers.size === 0) {
+            activity.textContent = "";
+        } else if (typingUsers.size === 1) {
+            activity.textContent = `${name} is typing...`
+        } else {
+            activity.textContent = `${Array.from(typingUsers).join(", ")} are typing...`;
+        }
+    }, 1500)
 })
 
 socket.on('userList', ({ users }) => {
