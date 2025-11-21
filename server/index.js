@@ -35,15 +35,38 @@ io.on('connection', socket => {
     console.log(`User ${socket.id} connected`);
 
     // Upon connection - only to user 
-    socket.emit('message', buildMsg(ADMIN, "Welcome to Roomyfy!"));
-    socket.emit('message', buildMsg('SYSTEM_HELPER', "Enter a name and chatroom to chat with people"));
+    socket.emit('message', buildMsg(ADMIN, "Connected to websocket successfully!"));
+    socket.emit('message', buildMsg('SYSTEM_HELPER', "Enter a username and chatroom to chat with other people."));
 
     socket.on('enterRoom', ({ name, room }) => {
         
-        const prohibitedNames = ['SYSTEM', 'SYSTEM_HELPER', 'ADMIN', 'MODERATOR', 'SERVER', 'OWNER', 'DEV', 'DEVELOPER', 'BOT', 'NULL', 'MANAGER', 'TEAM', 'STAFF', 'ADMINISTRATOR', 'SERVERBOT'];
+        const prohibitedNames = [
+            'SYSTEM', 
+            'SYSTEM_HELPER', 
+            'ADMIN', 
+            'MODERATOR', 
+            'SERVER', 
+            'OWNER', 
+            'DEV', 
+            'DEVELOPER', 
+            'BOT', 
+            'NULL', 
+            'MANAGER', 
+            'TEAM', 
+            'STAFF', 
+            'ADMINISTRATOR', 
+            'SERVERBOT', 
+            'INFO',
+            ' '
+        ];
+        const allowedCharacters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '1', '2', '3', '4', '5', '6', '7', '8', '9', '_', '-']; 
         const cleanName = name.trim().toUpperCase();
         if (prohibitedNames.some(word => cleanName.includes(word))) {
             socket.emit('message', buildMsg(ADMIN, `The name "${name}" is reserved or blacklisted. \n Please choose another name.`));
+            return;
+        }
+        if (![...cleanName].every(char => allowedCharacters.includes(char))) {
+            socket.emit('message', buildMsg(ADMIN, `The name "${name}" contains invalid characters`))
             return;
         }
 
