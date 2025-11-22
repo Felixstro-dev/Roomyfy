@@ -117,6 +117,7 @@ socket.on("chat_image", (data) => {
 
     chatDisplay.appendChild(li);
     chatDisplay.scrollTop = chatDisplay.scrollHeight;
+    activity.textContent = "";
 });
 
 
@@ -155,11 +156,17 @@ function showUsers(users, room) {
         return;
     }
 
-    const userNames = users.map(user => user.name).join(', ');
-    usersList.textContent = `Users in ${room}: ${userNames}`;
+    const maxDisplay = 15;
+    const displayedUsers = users.slice(0, maxDisplay).map(u => u.name).join(', ');
+    const remainingCount = users.length - maxDisplay;
+
+    let content = `Users in ${room}: ${displayedUsers}`;
+    if (remainingCount > 0) {
+        content += ` and ${remainingCount} more`;
+    }
+
+    usersList.textContent = content;
 }
-
-
 
 
 
