@@ -10,29 +10,36 @@
         integrity="sha512-Xm9qbB6Pu06k3PUwPj785dyTl6oHxgsv9nHp7ej7nCpAqGZT3OZpsELuCYX05DdonFpTlBpXMOxjavIAIUwr0w=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script defer src="app.js"></script>
+    <script defer src="image.js"></script>
 </head>
 
 <body>
     <main>
         <form class="form-join">
-            <input type="text" id="name" maxlength="11" placeholder="Your name" size="5" required>
+            <input type="text" id="name" maxlength="15" placeholder="Your name" size="5" required>
             <input  type="text" id="room" maxlength="15" placeholder="Room Name" size="5" required>
-            <button id="join" type="submit">Join</button>
+            <button id="join" type="submit">Connect</button>
         </form>
 
         <ul class="chat-display"></ul>
 
-        <p class="user-list"></p>
+        <p class="user-list">not connected to any room</p>
 
         <p class="activity"></p>
-        <button class="reconnect" id="reconnect" type="submit">Reconnect</button>
-        
 
         <form class="form-msg">
-            <input type="text" id="message" placeholder="Your message" required>
+            <input type="text" id="message" placeholder="Message to send" required>
+
+            <button class="selectphoto" type="button" id="choose_image">&#128247;</button>
+            <input type="file" id="image_input" accept="image/*" style="display:none">
+
             <button type="submit">Send</button>
         </form>
+        
     </main>
+    <script>
+        const socket = io(window.location.origin);
+    </script>
 </body>
 
 </html>

@@ -1,6 +1,3 @@
-const socket = io(window.location.origin);
-
-
 const msgInput = document.querySelector('#message')
 const nameInput = document.querySelector('#name')
 const chatRoom = document.querySelector('#room')
@@ -21,22 +18,26 @@ function sendMessage(e) {
     msgInput.focus()
 }
 
+let currentRoom = null;
+
 function enterRoom(e) {
-    e.preventDefault()
-    if (nameInput.value && chatRoom.value) {
-        socket.emit('enterRoom', {
-            name: nameInput.value,
-            room: chatRoom.value
-        })
+    if (!currentRoom === null) {
+        return;
+    } else {
+        e.preventDefault();
+        if (nameInput.value && chatRoom.value) {
+            socket.emit('enterRoom', { name: nameInput.value, room: chatRoom.value }, ( room ) => {
+                chatDisplay.innerHTML = '';
+
+                currentRoom = room
+                document.getElementById("join").disabled = true;
+                setTimeout(() => {
+                    document.getElementById("join").disabled = false;
+                }, 4000);
+            });
+        }
     }
-    const li = document.createElement('li');
-    li.classList.add('post__connect');
-    li.innerHTML = `<div class="post__text--connect">Connected to: ${chatRoom.value}</div>`;
-    chatDisplay.appendChild(li);
-    document.getElementById("join").disabled = true;
-    setTimeout(() => {
-      document.getElementById("join").disabled = false;
-    }, 4000);
+
 }
 
 document.querySelector('.form-msg')
@@ -81,45 +82,84 @@ socket.on("message", (data) => {
 
     chatDisplay.appendChild(li);
     chatDisplay.scrollTop = chatDisplay.scrollHeight;
+    activity.textContent = "";
 });
+
+
+socket.on("chat_image", (data) => {
+    activity.textContent = "";
+    const { name, image, time } = data;
+
+    const isOwnMessage = name === nameInput.value;
+    const li = document.createElement('li');
+    li.classList.add('post');
+
+    if (isOwnMessage) {
+        li.classList.add('post--right');
+    } else {
+        li.classList.add('post--left');
+    }
+
+    const blob = new Blob([image], { type: data.type });
+    const url = URL.createObjectURL(blob);
+
+
+    const headerClass = isOwnMessage ? 'post__header--user' : 'post__header--reply';
+    li.innerHTML = `
+        <div class="post__header ${headerClass}">
+            <span class="post__header--name">${name}</span>
+            <span class="post__header--time">${time}</span>
+        </div>
+        <div class="post__text">
+            <img width="300px" style="image-rendering: pixelated;" src="${url}">
+        </div>
+    `;
+
+    chatDisplay.appendChild(li);
+    chatDisplay.scrollTop = chatDisplay.scrollHeight;
+});
+
+
 
 const typingUsers = new Set();
 
-socket.on("activity", (name) => {
-    typingUsers.add(name);
-
+function updateActivityText() {
     if (typingUsers.size === 0) {
         activity.textContent = "";
     } else if (typingUsers.size === 1) {
-        activity.textContent = `${name} is typing...`
+        activity.textContent = `${Array.from(typingUsers)[0]} is typing...`;
     } else {
-        activity.textContent = `${typingUsers.join(", ")} are typing...`;
-    }
-
-    setTimeout(() => {
-        if (typingUsers.size === 0) {
-            activity.textContent = "";
-        } else if (typingUsers.size === 1) {
-            activity.textContent = `${name} is typing...`
-        } else {
-            activity.textContent = `${Array.from(typingUsers).join(", ")} are typing...`;
-        }
-    }, 1500)
-})
-
-socket.on('userList', ({ users }) => {
-    showUsers(users)
-})
-
-function showUsers(users) {
-    usersList.textContent = ''
-    if (users) {
-        usersList.innerHTML = `<em>Users in ${chatRoom.value}:</em>`
-        users.forEach((user, i) => {
-            usersList.textContent += ` ${user.name}`
-            if (users.length > 1 && i !== users.length - 1) {
-                usersList.textContent += ","
-            }
-        })
+        activity.textContent = `${Array.from(typingUsers).join(", ")} are typing...`;
     }
 }
+
+socket.on("activity", (name) => {
+    typingUsers.add(name);
+    updateActivityText();
+
+    setTimeout(() => {
+        typingUsers.delete(name);
+        updateActivityText();
+    }, 1500);
+});
+
+
+socket.on('userList', ({ users, room }) => {
+    showUsers(users, room);
+    console.log('userList:', users);
+})
+
+function showUsers(users, room) {
+    if (!users || users.length === 0) {
+        usersList.textContent = '';
+        return;
+    }
+
+    const userNames = users.map(user => user.name).join(', ');
+    usersList.textContent = `Users in ${room}: ${userNames}`;
+}
+
+
+
+
+

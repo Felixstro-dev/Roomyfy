@@ -4,19 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login</title>
+  <script src="https://cdn.jsdelivr.net/npm/js-sha256@0.9.0/build/sha256.min.js"></script>
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'monospace', monospace;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      background:#161616;
+      background:#111312;
       margin: 0;
     }
 
     .login-box {
-      background: #fff;
+      background: #111312;
       padding: 40px;
       border-radius: 15px;
       width: 350px;
@@ -25,7 +26,7 @@
 
     .login-box h2 {
       margin-bottom: 30px;
-      color: #2c2c2c;
+      color: #49bb79;
     }
 
     .login-box input[type="text"] {
@@ -33,8 +34,9 @@
       padding: 12px;
       margin-bottom: 20px;
       border-radius: 8px;
-      border: 2px solid #ccc;
+      border: 2px solid #49bb79;
       font-size: 16px;
+      background-color: #111312;
     }
 
     .pin-container {
@@ -49,7 +51,13 @@
       font-size: 24px;
       text-align: center;
       border-radius: 10px;
-      border: 1px solid #ccc;
+      background-color: #111312;
+      border: 1px solid #5bb982;
+      color: #49bb79;
+    }
+
+    .pin-container input:focus {
+      outline: none;
     }
 
     button {
@@ -58,18 +66,19 @@
       font-size: 18px;
       border: none;
       border-radius: 10px;
-      background-color: #1d1d1d;
-      color: white;
+      background-color: #111312;
+      color: #49bb79;
+      border: 1px solid #5bb982;
       cursor: pointer;
       transition: all 0.3s;
     }
 
     button:hover {
-      background-color: #1c5980;
+      background-color: #1c2921;
     }
 
     .error {
-      color: red;
+      color: #5bb982;
       margin-top: 15px;
     }
   </style>
@@ -85,29 +94,30 @@
     <input type="password" maxlength="1" class="pin">
   </div>
 
-  <button onclick="login()">Einloggen</button>
+  <button style="margin-bottom: 1rem;" onclick="reset()">Clear</button>
+  <button onclick="login()">Login</button>
   <p class="error" id="error"></p>
 </div>
 
 <script>
 const pins = document.querySelectorAll('.pin');
+const error = document.getElementById('error');
+
 pins.forEach((pin, index) => {
   pin.addEventListener('input', () => {
+    error.textContent = "";
     if (pin.value.length === 1 && index < pins.length - 1) {
       pins[index + 1].focus();
     }
   });
+
+  pin.addEventListener('keydown', (e) => {
+    if (e.key === 'Backspace' && pin.value === '' && index > 0) {
+      pins[index - 1].focus();
+    }
+  });
 });
 
-// helper function to SHA-256 hash a string
-async function sha256(message) {
-  const msgBuffer = new TextEncoder().encode(message);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
-// hardcoded array of allowed hashed PINs
 const validHashes = [
   "17e07e2750f3e5656e5da1728aeebf94189a94d279faf701ee79c795a7d5b91b", 
   "d07164a628596323ebcf8796dee0e5c164620e0922b52483bc805f54416ee73c",
@@ -115,24 +125,29 @@ const validHashes = [
   "03aaef0fd45d47ee37afee60b41f0a80010f58f95d3d34e9b7dc253c8558bf2a"
 ];
 
-async function login() {
-  const password = Array.from(pins).map(p => p.value).join('');
-  const error = document.getElementById('error');
+function reset() {
+  pins.forEach(input => input.value = "");
+  pins[0].focus();
+  error.textContent = "";
+}
 
-  if (password.length !== 4) {
-    error.textContent = "Bitte 4-stelliges Passwort eingeben";
+function login() {
+  const password = Array.from(pins).map(p => p.value).join('');
+
+  if (password.length !== pins.length) {
+    error.textContent = "Enter a password";
     return;
   }
 
-  const hashedPassword = await sha256(password);
+  // Use js-sha256 from CDN
+  const hashedPassword = sha256(password);
 
   if (validHashes.includes(hashedPassword)) {
     window.location.href = "chat.html";
   } else {
-    error.textContent = "Passwort falsch";
+    error.textContent = "Incorrect password";
   }
 }
-
 </script>
 
 </body>

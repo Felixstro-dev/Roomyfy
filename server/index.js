@@ -97,12 +97,8 @@ io.on('connection', socket => {
 
         // Update user list for room 
         io.to(user.room).emit('userList', {
-            users: getUsersInRoom(user.room)
-        });
-
-        // Update rooms list for everyone 
-        io.emit('roomList', {
-            rooms: getAllActiveRooms()
+            users: getUsersInRoom(user.room),
+            room: user.room
         });
     });
 
@@ -116,11 +112,8 @@ io.on('connection', socket => {
             io.to(user.room).emit('message', buildMsg(ADMIN, `${user.name} has left the room`));
 
             io.to(user.room).emit('userList', {
-                users: getUsersInRoom(user.room)
-            });
-
-            io.emit('roomList', {
-                rooms: getAllActiveRooms()
+                users: getUsersInRoom(user.room),
+                room: user.room
             });
         }
 
@@ -132,8 +125,30 @@ io.on('connection', socket => {
         const room = getUser(socket.id)?.room;
         if (room) {
             io.to(room).emit('message', buildMsg(name, text));
+            console.log('A message has been sent!');
         }
+        
     });
+
+    socket.on("chat_image", ({ name, type, image }) => {
+        const room = getUser(socket.id)?.room;
+        if (!room) return;
+
+        const time = new Intl.DateTimeFormat("default", {
+            hour: "numeric",
+            minute: "numeric",
+            second: "numeric",
+        }).format(new Date());
+
+        io.to(room).emit("chat_image", {
+            name,
+            type,
+            image,
+            time,
+        });
+        console.log('An image has been sent!');
+    });
+
 
     // Listen for activity 
     socket.on('activity', (name) => {
@@ -181,6 +196,6 @@ function getUsersInRoom(room) {
     return UsersState.users.filter(user => user.room === room)
 }
 
-function getAllActiveRooms() {
+/* function getAllActiveRooms() {
     return Array.from(new Set(UsersState.users.map(user => user.room)))
-}
+} */
