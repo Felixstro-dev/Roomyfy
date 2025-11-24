@@ -5,6 +5,7 @@ const activity = document.querySelector('.activity')
 const usersList = document.querySelector('.user-list')
 const roomList = document.querySelector('.room-list')
 const chatDisplay = document.querySelector('.chat-display')
+const statusDisplay = document.querySelector('.status')
 
 function sendMessage(e) {
     e.preventDefault()
@@ -48,7 +49,19 @@ document.querySelector('.form-join')
 
 msgInput.addEventListener('keypress', () => {
     socket.emit('activity', nameInput.value)
+});
+
+socket.on("connect", () => {
+    activity.textContent = "";
+    usersList.textContent = "";
+    statusDisplay.textContent = "Connected to websocket server!"
 })
+
+socket.on("disconnect", () => {
+    activity.textContent = "Not connected";
+    usersList.textContent = "Not connected to websocket server!!!";
+    statusDisplay.textContent = "Not connected to websocket server!!!"
+});
 
 socket.on("message", (data) => {
     activity.textContent = "";

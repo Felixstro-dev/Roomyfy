@@ -180,7 +180,7 @@ button {
 }
 
 
-.user-list {
+.user-list, .status {
     background-color: #081410;
     color: #49bb79;
     width: 100%;
