@@ -9,7 +9,17 @@ const __dirname = path.dirname(__filename)
 const PORT = process.env.PORT || 3500
 const ADMIN = "system-messages-normal-user-unclaimable"
 
-const app = express()
+const app = express();
+
+const prohibitedNames = [
+    'SYSTEM', 'ADMIN', 'MODERATOR', 'SERVER', 'OWNER', 'DEV', 'DEVELOPER',
+    'BOT', 'MANAGER', 'TEAM', 'STAFF', 'ADMINISTRATOR', 'SERVERBOT', 'INFO', "system-messages-normal-user-unclaimable"
+];
+
+const allowedCharacters = [
+    'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R',
+    'S','T','U','V','W','X','Y','Z','1','2','3','4','5','6','7','8','9','0','_','-'
+];
 
 app.use(express.static(path.join(__dirname, "public")))
 
@@ -39,31 +49,13 @@ io.on('connection', socket => {
     socket.emit('message', buildMsg('INFO', "Enter a username and chatroom to chat with other people."));
 
     socket.on('enterRoom', ({ name, room }) => {
-        
-        const prohibitedNames = [
-            'SYSTEM', 
-            'ADMIN', 
-            'MODERATOR', 
-            'SERVER', 
-            'OWNER', 
-            'DEV', 
-            'DEVELOPER', 
-            'BOT',  
-            'MANAGER', 
-            'TEAM', 
-            'STAFF', 
-            'ADMINISTRATOR', 
-            'SERVERBOT', 
-            'INFO',
-            ' '
-        ];
-        const allowedCharacters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '_', '-']; 
-        const cleanName = name.trim().toUpperCase();
-        if (prohibitedNames.some(word => cleanName.includes(word))) {
+        const isValidName = validateName(name);
+
+        if (isValidName === "invalidName") {
             socket.emit('message', buildMsg(ADMIN, `The name "${name}" is reserved or blacklisted. \n Please choose another name.`));
             return;
         }
-        if (![...cleanName].every(char => allowedCharacters.includes(char))) {
+        if (isValidName === "invalidChar") {
             socket.emit('message', buildMsg(ADMIN, `The name "${name}" contains invalid characters`))
             return;
         }
@@ -123,15 +115,46 @@ io.on('connection', socket => {
     socket.on('message', ({ name, text }) => {
         const room = getUser(socket.id)?.room;
         if (room) {
-            io.to(room).emit('message', buildMsg(name, text));
-            console.log('A message has been sent!');
+            const isValidName = validateName(name);
+
+            if (isValidName === "char" || isValidName === "name") return;
+
+            const prohibitedStrings = [
+                '<iframe>', '</iframe>',
+                '<script>', '</script>',
+                '<embed>', '</embed>',
+                '<object>', '</object>',
+                '<link>', '</link>',
+                '<style>', '</style>',
+                '<img>', '</img>',
+                '<button>', '</button>',
+                '<form>', '</form>',
+                '<input>', '</input>',
+
+                'onerror', 'onclick', 'onload', 'onmouseover', 'onfocus', 'onblur',
+                'onmouseenter', 'onmouseleave', 'onkeydown', 'onkeyup', 'onchange',
+
+                'src=', 'href=', 'style=', 'background=', 'data:', 'javascript:', 'vbscript:', 'expression('
+            ];
+
+            const cleanMessage = text.trim().toLowerCase();
+            const containsProhibited = prohibitedStrings.some(str => cleanMessage.includes(str));
+            if (!containsProhibited) {
+                io.to(room).emit('message', buildMsg(name, text));
+                console.log('A message has been sent!');
+            } else {
+                console.log(`Blocked message! Possible XSS attempt`);
+            }
+
         }
         
     });
 
     socket.on("chat_image", ({ name, type, image }) => {
         const room = getUser(socket.id)?.room;
+        const isValidName = validateName(name);
         if (!room) return;
+        if (!isValidName === "valid" || !isValidName === true) return;
 
         const time = new Intl.DateTimeFormat("default", {
             hour: "numeric",
@@ -152,9 +175,10 @@ io.on('connection', socket => {
     // Listen for activity 
     socket.on('activity', (name) => {
         const room = getUser(socket.id)?.room;
-        if (room) {
-            socket.broadcast.to(room).emit('activity', name);
-        }
+        const isValidName = validateName(name);
+        if (!room) return;
+        if (!isValidName === "valid" || !isValidName === true) return;
+        socket.broadcast.to(room).emit('activity', name);
     });
 });
 
@@ -193,6 +217,20 @@ function getUser(id) {
 
 function getUsersInRoom(room) {
     return UsersState.users.filter(user => user.room === room)
+}
+
+function validateName(name) {
+    const cleanName = name.trim().toUpperCase();
+
+    if (![...cleanName].every(char => allowedCharacters.includes(char))) {
+        return "invalidChar";
+    }
+
+    if (prohibitedNames.includes(cleanName)) {
+        return "invalidName";
+    }
+
+    return true;
 }
 
 /* function getAllActiveRooms() {
