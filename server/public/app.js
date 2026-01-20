@@ -57,6 +57,8 @@ socket.on("connect", () => {
     activity.textContent = "";
     usersList.textContent = "";
     statusDisplay.textContent = "Connected to websocket server!"
+    msgInput.disabled = false;
+    document.getElementById("choose_image").disabled = false;
 })
 
 socket.on("disconnect", () => {
