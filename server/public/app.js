@@ -31,7 +31,7 @@ function enterRoom(e) {
                 chatDisplay.innerHTML = '';
 
                 currentRoom = room
-                msgInput.disabled = true;
+                msgInput.disabled = false;
                 document.getElementById("choose_image").disabled = false;
                 document.getElementById("join").disabled = true;
                 setTimeout(() => {
