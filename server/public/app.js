@@ -31,6 +31,8 @@ function enterRoom(e) {
                 chatDisplay.innerHTML = '';
 
                 currentRoom = room
+                msgInput.disabled = true;
+                document.getElementById("choose_image").disabled = false;
                 document.getElementById("join").disabled = true;
                 setTimeout(() => {
                     document.getElementById("join").disabled = false;
@@ -60,7 +62,9 @@ socket.on("connect", () => {
 socket.on("disconnect", () => {
     activity.textContent = "Not connected";
     usersList.textContent = "Not connected to websocket server!!!";
-    statusDisplay.textContent = "Not connected to websocket server!!!"
+    statusDisplay.textContent = "Not connected to websocket server!!!";
+    msgInput.disabled = true;
+    document.getElementById("choose_image").disabled = true;
 });
 
 socket.on("message", (data) => {
