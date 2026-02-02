@@ -50,6 +50,7 @@ io.on('connection', socket => {
 
     socket.on('enterRoom', ({ name, room }) => {
         const isValidName = validateName(name);
+        room = room.toLowerCase();
 
         if (isValidName === "invalidName") {
             socket.emit('message', buildMsg(ADMIN, `The name "${name}" is reserved or blacklisted. \n Please choose another name.`));
