@@ -9,6 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"
         integrity="sha512-Xm9qbB6Pu06k3PUwPj785dyTl6oHxgsv9nHp7ej7nCpAqGZT3OZpsELuCYX05DdonFpTlBpXMOxjavIAIUwr0w=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/ldrs/dist/auto/dotPulse.js"></script>
     <script defer src="app.js"></script>
     <script defer src="image.js"></script>
 </head>
@@ -27,7 +28,10 @@
 
         <p class="status">not connected to websocket</p>
 
-        <p class="activity"></p>
+        <div id="activity">
+            <l-dot-pulse id="activityloader" size="43" speed="1.3" color="white"></l-dot-pulse>
+            <p id="activitytext"></p>
+        </div>
 
         <form class="form-msg">
             <input type="text" id="message" placeholder="Message to send" required>

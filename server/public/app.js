@@ -1,11 +1,12 @@
 const msgInput = document.querySelector('#message')
 const nameInput = document.querySelector('#name')
 const chatRoom = document.querySelector('#room')
-const activity = document.querySelector('.activity')
 const usersList = document.querySelector('.user-list')
 const roomList = document.querySelector('.room-list')
 const chatDisplay = document.querySelector('.chat-display')
 const statusDisplay = document.querySelector('.status')
+const activityLoader = document.getElementById("activityloader");
+const activityText = document.getElementById("activitytext");
 
 function sendMessage(e) {
     e.preventDefault()
@@ -54,7 +55,8 @@ msgInput.addEventListener('keypress', () => {
 });
 
 socket.on("connect", () => {
-    activity.textContent = "";
+    activityText.textContent = "";
+    activityLoader.hidden = true;
     usersList.textContent = "";
     statusDisplay.textContent = "Connected to websocket server!"
     msgInput.disabled = false;
@@ -62,15 +64,16 @@ socket.on("connect", () => {
 })
 
 socket.on("disconnect", () => {
-    activity.textContent = "Not connected";
-    usersList.textContent = "Not connected to websocket server!!!";
-    statusDisplay.textContent = "Not connected to websocket server!!!";
+    activityText.textContent = "Not connected";
+    activityLoader.hidden = true;
+    usersList.textContent = "Not connected to websocket server!";
+    statusDisplay.textContent = "Not connected to websocket server!";
     msgInput.disabled = true;
     document.getElementById("choose_image").disabled = true;
 });
 
 socket.on("message", (data) => {
-    activity.textContent = "";
+    activityText.textContent = "";
     const { name, text, time } = data;
 
     const li = document.createElement('li');
@@ -85,11 +88,15 @@ socket.on("message", (data) => {
         li.classList.add('post--left');
     }
 
+    const nameColor = stringtocolor(name)
+
+    if (text.startsWith('/!')) return;
+
     if (!isAdminMessage) {
         const headerClass = isOwnMessage ? 'post__header--user' : 'post__header--reply';
         li.innerHTML = `
-            <div class="post__header ${headerClass}">
-                <span class="post__header--name">${name}</span>
+            <div style="background-color: ${nameColor}; background: ${nameColor}" class="post__header ${headerClass}">
+                <span  class="post__header--name">${name}</span>
                 <span class="post__header--time">${time}</span>
             </div>
             <div class="post__text">${text}</div>
@@ -101,12 +108,12 @@ socket.on("message", (data) => {
 
     chatDisplay.appendChild(li);
     chatDisplay.scrollTop = chatDisplay.scrollHeight;
-    activity.textContent = "";
+    activityText.textContent = "";
 });
 
 
 socket.on("chat_image", (data) => {
-    activity.textContent = "";
+    activityText.textContent = "";
     const { name, image, time } = data;
 
     const isOwnMessage = name === nameInput.value;
@@ -122,10 +129,11 @@ socket.on("chat_image", (data) => {
     const blob = new Blob([image], { type: data.type });
     const url = URL.createObjectURL(blob);
 
+    const nameColor = stringtocolor(name)
 
     const headerClass = isOwnMessage ? 'post__header--user' : 'post__header--reply';
     li.innerHTML = `
-        <div class="post__header ${headerClass}">
+        <div style="background-color: ${nameColor}; background: ${nameColor}" class="post__header ${headerClass}">
             <span class="post__header--name">${name}</span>
             <span class="post__header--time">${time}</span>
         </div>
@@ -139,17 +147,24 @@ socket.on("chat_image", (data) => {
     activity.textContent = "";
 });
 
-
-
 const typingUsers = new Set();
+const typingTimeouts = new Map();
+const TYPING_DELAY = 1500;
 
 function updateActivityText() {
     if (typingUsers.size === 0) {
-        activity.textContent = "";
-    } else if (typingUsers.size === 1) {
-        activity.textContent = `${Array.from(typingUsers)[0]} is typing...`;
+        activityLoader.hidden = true;
+        activityText.textContent = "";
+        return;
+    }
+
+    const users = [...typingUsers];
+    activityLoader.hidden = false;
+
+    if (users.length === 1) {
+        activityText.textContent = `${users[0]} is typing...`;
     } else {
-        activity.textContent = `${Array.from(typingUsers).join(", ")} are typing...`;
+        activityText.textContent = `${users.join(", ")} are typing...`;
     }
 }
 
@@ -157,10 +172,18 @@ socket.on("activity", (name) => {
     typingUsers.add(name);
     updateActivityText();
 
-    setTimeout(() => {
-        typingUsers.delete(name);
-        updateActivityText();
-    }, 1500);
+    if (typingTimeouts.has(name)) {
+        clearTimeout(typingTimeouts.get(name));
+    }
+
+    typingTimeouts.set(
+        name,
+        setTimeout(() => {
+            typingUsers.delete(name);
+            typingTimeouts.delete(name);
+            updateActivityText();
+        }, TYPING_DELAY)
+    );
 });
 
 
@@ -171,7 +194,7 @@ socket.on('userList', ({ users, room }) => {
 
 function showUsers(users, room) {
     if (!users || users.length === 0) {
-        usersList.textContent = '';
+        usersList.textContent = 'not connected to any room';
         return;
     }
 
@@ -187,5 +210,17 @@ function showUsers(users, room) {
     usersList.textContent = content;
 }
 
+function stringtocolor(str) {
+    let hash = 0;
 
+    if (str == 'INFO') return '#2b6da3';
 
+    for (let i = 0; i < str.length; i++) {
+        hash ^= str.charCodeAt(i);
+        hash = Math.imul(hash, 16777619);
+    }   
+    const hue = Math.abs(hash) % 360;
+    const saturation = 55;
+    const lightness = 30;
+    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+}

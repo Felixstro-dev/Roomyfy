@@ -2,9 +2,21 @@ import express from 'express'
 import { Server } from "socket.io"
 import path from 'path'
 import { fileURLToPath } from 'url'
+import cookieParser from "cookie-parser";
+import dotenv from "dotenv";
+import { runCommand } from './commands.js';
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const protectionEnabled = process.env.ENABLE_PROTECTION === "true";
+
+const allowedPasswords = (process.env.PROTECTION_PASSWORDS || "")
+  .split(",")
+  .map(p => p.trim())
+  .filter(Boolean);
 
 const PORT = process.env.PORT || 3500
 const ADMIN = "system-messages-normal-user-unclaimable"
@@ -12,14 +24,31 @@ const ADMIN = "system-messages-normal-user-unclaimable"
 const app = express();
 
 const prohibitedNames = [
-    'SYSTEM', 'ADMIN', 'MODERATOR', 'SERVER', 'OWNER', 'DEV', 'DEVELOPER',
-    'BOT', 'MANAGER', 'TEAM', 'STAFF', 'ADMINISTRATOR', 'SERVERBOT', 'INFO', "system-messages-normal-user-unclaimable"
+    'SYSTEM', 'ADMIN', 'MODERATOR', 'SERVER', 'OWNER', 'DEV', 'DEVELOPER', 'COMMANDS', 'COMMAND',
+    'BOT', 'MANAGER', 'TEAM', 'STAFF', 'ADMINISTRATOR', 'SERVERBOT', 'INFO', "system-messages-normal-user-unclaimable", ADMIN
 ];
 
 const allowedCharacters = [
     'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R',
     'S','T','U','V','W','X','Y','Z','1','2','3','4','5','6','7','8','9','0','_','-'
 ];
+
+function middleware(req, res, next) {
+  if (!protectionEnabled) return next();
+
+  if (req.path !== "/chat.html") return next();
+
+  const authCookie = req.cookies.auth;
+
+  if (allowedPasswords.includes(authCookie)) {
+    return next();
+  }
+
+  return res.redirect("/");
+}
+
+app.use(cookieParser());
+app.use(middleware);
 
 app.use(express.static(path.join(__dirname, "public")))
 
@@ -35,7 +64,7 @@ const UsersState = {
     }
 }
 
-const io = new Server(expressServer, {
+export const io = new Server(expressServer, {
     cors: {
         origin: process.env.NODE_ENV === "production" ? false : ["http://localhost:5500", "http://127.0.0.1:5500"]
     }
@@ -46,7 +75,7 @@ io.on('connection', socket => {
 
     // Upon connection - only to user 
     socket.emit('message', buildMsg(ADMIN, "Connected to websocket successfully!"));
-    socket.emit('message', buildMsg('INFO', "Enter a username and chatroom to chat with other people."));
+    socket.emit('message', buildMsg('INFO', "Enter a username and chatroom to chat with other people.<br>Use /!help to see commands"));
 
     socket.on('enterRoom', ({ name, room }) => {
         const isValidName = validateName(name);
@@ -71,7 +100,6 @@ io.on('connection', socket => {
 
         const user = activateUser(socket.id, name, room);
 
-        // Cannot update previous room users list until after the state update in activate user 
         if (prevRoom) {
             io.to(prevRoom).emit('userList', {
                 users: getUsersInRoom(prevRoom)
@@ -140,6 +168,9 @@ io.on('connection', socket => {
 
             const cleanMessage = text.trim().toLowerCase();
             const containsProhibited = prohibitedStrings.some(str => cleanMessage.includes(str));
+
+            if (cleanMessage.startsWith('/!')) runCommand(cleanMessage, room, socket);
+
             if (!containsProhibited) {
                 io.to(room).emit('message', buildMsg(name, text));
                 console.log('A message has been sent!');
@@ -184,7 +215,7 @@ io.on('connection', socket => {
 });
 
 
-function buildMsg(name, text) {
+export function buildMsg(name, text) {
     return {
         name,
         text,
