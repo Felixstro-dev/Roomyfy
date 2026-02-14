@@ -5,7 +5,7 @@ export function runCommand(cmd, room, socket) {
     const command = parts[0].toLowerCase();
     const args = parts.slice(1);
 
-    if (commandsEnabled !== "true" || commandsEnabled !== true) {
+    if (commandsEnabled !== "true") {
         socket.emit('message', buildMsg(ADMIN, "Commands are not enabled on this Instance"));
         return;
     }
