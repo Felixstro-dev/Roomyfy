@@ -34,7 +34,7 @@ const allowedCharacters = [
 ];
 
 function middleware(req, res, next) {
-    if (protectionEnabled === "false" && req.path === "/") {
+    if (protectionEnabled !== "true" && req.path == "/") {
         return res.redirect("/chat.html");
     }
 
@@ -42,7 +42,7 @@ function middleware(req, res, next) {
 
     const authCookie = req.cookies.auth;
 
-    if (allowedPasswords.includes(authCookie) || protectionEnabled == "false") return next();
+    if (allowedPasswords.includes(authCookie) || protectionEnabled !== "true") return next();
 
     return res.redirect("/");
 }
