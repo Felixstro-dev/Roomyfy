@@ -11,7 +11,7 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const protectionEnabled = process.env.ENABLE_PROTECTION === "true";
+const protectionEnabled = process.env.ENABLE_PROTECTION || "false";
 
 const allowedPasswords = (process.env.PROTECTION_PASSWORDS || "")
   .split(",")
@@ -34,17 +34,17 @@ const allowedCharacters = [
 ];
 
 function middleware(req, res, next) {
-  if (!protectionEnabled) return next();
+    if (protectionEnabled === "false" && req.path === "/") {
+        return res.redirect("/chat.html");
+    }
 
-  if (req.path !== "/chat.html") return next();
+    if (req.path !== "/chat.html") return next();
 
-  const authCookie = req.cookies.auth;
+    const authCookie = req.cookies.auth;
 
-  if (allowedPasswords.includes(authCookie)) {
-    return next();
-  }
+    if (allowedPasswords.includes(authCookie) || protectionEnabled == "false") return next();
 
-  return res.redirect("/");
+    return res.redirect("/");
 }
 
 app.use(cookieParser());
@@ -188,6 +188,11 @@ io.on('connection', socket => {
         if (!room) return;
         if (!isValidName === "valid" || !isValidName === true) return;
 
+        if (process.env.ENABLE_IMAGES !== "true")  {
+            socket.emit('message', buildMsg(ADMIN, 'Sending images is disabled on this instance'));
+            return;
+        };
+
         const time = new Intl.DateTimeFormat("default", {
             hour: "numeric",
             minute: "numeric",
@@ -243,12 +248,18 @@ function userLeavesApp(id) {
     )
 }
 
-function getUser(id) {
+export function getUser(id) {
     return UsersState.users.find(user => user.id === id)
 }
 
 function getUsersInRoom(room) {
     return UsersState.users.filter(user => user.room === room)
+}
+
+export function getUserByName(name, room) {
+    return UsersState.users.find(user => 
+        user.name.toLowerCase() === name.toLowerCase() && user.room === room
+    )
 }
 
 function validateName(name) {
