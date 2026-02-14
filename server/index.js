@@ -21,7 +21,7 @@ const allowedPasswords = (process.env.PROTECTION_PASSWORDS || "")
   .filter(Boolean);
 
 const PORT = process.env.PORT || 3500
-const ADMIN = "system-messages-normal-user-unclaimable"
+export const ADMIN = "system-messages-normal-user-unclaimable"
 
 const app = express();
 
