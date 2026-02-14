@@ -13,6 +13,8 @@ const __dirname = path.dirname(__filename);
 
 const protectionEnabled = process.env.ENABLE_PROTECTION || "false";
 
+export const commandsEnabled = process.env.ENABLE_COMMANDS || "true";
+
 const allowedPasswords = (process.env.PROTECTION_PASSWORDS || "")
   .split(",")
   .map(p => p.trim())

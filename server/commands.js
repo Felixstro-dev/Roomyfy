@@ -1,9 +1,14 @@
-import { io, buildMsg, getUserByName, getUser } from './index.js'
+import { io, buildMsg, getUserByName, getUser, commandsEnabled, ADMIN } from './index.js'
 
 export function runCommand(cmd, room, socket) {
     const parts = cmd.trim().split(/\s+/);
     const command = parts[0].toLowerCase();
     const args = parts.slice(1);
+
+    if (commandsEnabled !== "true" || commandsEnabled !== true) {
+        socket.emit('message', buildMsg(ADMIN, "Commands are not enabled on this Instance"));
+        return;
+    }
     
     if (command == '/!help') {
         const commands = [
