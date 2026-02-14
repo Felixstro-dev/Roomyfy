@@ -9,7 +9,7 @@
   },
   "keywords": [],
   "author": "Felixstro-dev and JoplayXYZ",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "cookie-parser": "^1.4.7",
     "dotenv": "^17.2.3",
