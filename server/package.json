@@ -1,6 +1,6 @@
 {
   "name": "roomyfy",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Free, open-source and anonymous chat platform.",
   "main": "index.js",
   "type": "module",
