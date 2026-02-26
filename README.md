@@ -1,4 +1,4 @@
-# Roomyfy
+# Vanishtxt
 
 [![License](https://img.shields.io/badge/license-MIT-blueviolet?style=for-the-badge)](https://opensource.org/licenses/MIT)  [![Node.js](https://img.shields.io/badge/Node.js->=18-brightgreen?style=for-the-badge)](https://nodejs.org/)  [![NPM](https://img.shields.io/badge/NPM->=9-orange?style=for-the-badge)](https://www.npmjs.com/)  
 
