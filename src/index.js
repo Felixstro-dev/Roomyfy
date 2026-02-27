@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url'
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import { runCommand } from './commands.js';
+import { validateName, getUsersInRoom, getUser, userLeavesApp, activateUser, customLog } from './utilities.js';
 
 dotenv.config();
 
@@ -54,18 +55,21 @@ function middleware(req, res, next) {
 app.use(cookieParser());
 app.use(middleware);
 
-
 if (customFrontendEnabled == "true") {
     app.use(express.static(path.join(__dirname, customFrontendPath)))
 } else {
     app.use(express.static(path.join(__dirname, "frontend")))
 }
 const expressServer = app.listen(PORT, () => {
-    console.log(`listening on port ${PORT}`)
+    const message = `
+    \x1b[38;5;7m╭──────────────────────────────────────────────────────╮
+    \x1b[38;5;7m│ \x1b[0m Listening on \x1b[38;5;93mhttp://0.0.0.0:${PORT}\x1b[0m                    \x1b[38;5;7m│
+    \x1b[38;5;7m╰──────────────────────────────────────────────────────╯`;
+    console.log(message)
 })
 
 // state 
-const UsersState = {
+export const UsersState = {
     users: [],
     setUsers: function (newUsersArray) {
         this.users = newUsersArray
@@ -79,8 +83,7 @@ export const io = new Server(expressServer, {
 })
 
 io.on('connection', socket => {
-    console.log(`User ${socket.id} connected`);
-
+    customLog(`A user connected...`, false, false, "    ")
     
     socket.emit('config', { autoReconnect: autoReconnect === "true" });
 
@@ -148,7 +151,7 @@ io.on('connection', socket => {
             });
         }
 
-        console.log(`User ${socket.id} disconnected`);
+        customLog(`A user disconnected...`, false, false, "    ")
     });
 
     // Listening for a message event 
@@ -184,7 +187,6 @@ io.on('connection', socket => {
 
             if (!containsProhibited) {
                 io.to(room).emit('message', buildMsg(name, text));
-                console.log('A message has been sent!');
             } else {
                 console.log(`Blocked message! Possible XSS attempt`);
             }
@@ -216,7 +218,7 @@ io.on('connection', socket => {
             image,
             time,
         });
-        console.log('An image has been sent!');
+        customLog(`An Image has been sent!`, false, false, "    ")
     });
 
 
@@ -243,50 +245,14 @@ export function buildMsg(name, text) {
     }
 }
 
-// User functions 
-function activateUser(id, name, room) {
-    const user = { id, name, room }
-    UsersState.setUsers([
-        ...UsersState.users.filter(user => user.id !== id),
-        user
-    ])
-    return user
-}
-
-function userLeavesApp(id) {
-    UsersState.setUsers(
-        UsersState.users.filter(user => user.id !== id)
-    )
-}
-
-export function getUser(id) {
-    return UsersState.users.find(user => user.id === id)
-}
-
-function getUsersInRoom(room) {
-    return UsersState.users.filter(user => user.room === room)
-}
-
-export function getUserByName(name, room) {
-    return UsersState.users.find(user => 
-        user.name.toLowerCase() === name.toLowerCase() && user.room === room
-    )
-}
-
-function validateName(name) {
-    const cleanName = name.trim().toUpperCase();
-
-    if (![...cleanName].every(char => allowedCharacters.includes(char))) {
-        return "invalidChar";
-    }
-
-    if (prohibitedNames.includes(cleanName)) {
-        return "invalidName";
-    }
-
-    return true;
-}
-
 /* function getAllActiveRooms() {
     return Array.from(new Set(UsersState.users.map(user => user.room)))
 } */
+
+const message = `
+    \x1b[38;5;93m╭──────────────────────────────────────────────────────╮
+    \x1b[38;5;93m│ \x1b[38;5;7mVanishTXT v1.2.2\x1b[0m                                     \x1b[38;5;93m│
+    \x1b[38;5;93m╰──────────────────────────────────────────────────────╯
+
+    ${customLog("Starting", true, true)}`;
+console.log(message);

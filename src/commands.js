@@ -1,4 +1,5 @@
-import { io, buildMsg, getUserByName, getUser, commandsEnabled, ADMIN } from './index.js'
+import { io, buildMsg, commandsEnabled, ADMIN } from './index.js'
+import { getUser, getUserByName } from './utilities.js';
 
 export function runCommand(cmd, room, socket) {
     const parts = cmd.trim().split(/\s+/);
