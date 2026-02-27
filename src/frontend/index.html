@@ -5,18 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login</title>
   <style>
+    :root {
+        --accent: #9350ff;
+        --accent-but-brighter: #a984ff;
+        --muted: #786b96;
+        --txt-1: #f5f2ee;
+        --txt-2: #0b0e13;
+        --txt-3: #747474;
+        --bg: #0b0e13; 
+        --bg-2: #1d2633;
+    }
+
     body {
       font-family: 'monospace', monospace;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      background:#000000;
+      background:var(--bg);
       margin: 0;
     }
 
     .login-box {
-      background: #000000;
+      background: var(--bg);
       padding: 40px;
       border-radius: 15px;
       width: 350px;
@@ -25,7 +36,7 @@
 
     .login-box h2 {
       margin-bottom: 30px;
-      color: #49bb79;
+      color: var(--muted);
     }
 
     .login-box input,
@@ -34,38 +45,53 @@
       padding: 15px;
       font-size: 18px;
       border-radius: 8px;
-      border: 1px solid #49bb79;
-      background-color: #000000;
-      color: #49bb79;
+      border: 1px solid var(--accent);
+      background-color: var(--bg);
+      color: var(--accent);
       box-sizing: border-box;
+      transition: all 0.2s ease;
     }
 
     input:focus {
       outline: none;
+      background-color: var(--bg-2);
+    }
+
+    input:hover {
+      background-color: var(--bg-2);
     }
 
     button:hover {
-      background-color: #1c2921;
+      background-color: var(--bg-2);
     }
 
     .error {
-      color: #49bb79;
+      color: var(--accent);
       margin-top: 15px;
     }
 
     .console {
-      color: #49bb79;
+      color: var(--accent);
+    }
+
+    p {
+      color: var(--muted);
+    }
+
+    a {
+      color: var(--muted);
     }
   </style>
 </head>
 <body>
 
   <div class="login-box" id="loginbox">
-    
     <input style="margin-bottom: 1rem;" placeholder="Pin" type="password" id="pin">
-    <button style="margin-bottom: 1rem;" onclick="reset()">Clear</button>
+    <button style="margin-bottom: 1rem; display: none;" onclick="reset()">Clear</button>
     <button onclick="login()">Login</button>
     <p class="error" id="error"></p>
+    
+    <p style="font-size: 12px;">running on <a id="vanishtxt" href="https://github.com/felixstro-dev/vanishtxt">vanishtxt</a> v1.2.0<br>and vanishtxt-frontend v2</p>
   </div>
 
   <div class="console" style="align-items: center; text-align: center;" id="consolecontainer">
@@ -104,7 +130,7 @@ function type1() {
     index1++;
     setTimeout(type1, 100);
   } else {
-    setTimeout(type2, 500);
+    setTimeout(type2, 200);
   }
 }
 
@@ -112,12 +138,12 @@ function type2() {
   if (index2 < text2.length) {
     console2.textContent += text2[index2];
     index2++;
-    setTimeout(type2, 100);
+    setTimeout(type2, 50);
   } else {
     setTimeout((() => {
       loginbox.style.display = "block"
       consolec.style.display = "none"
-    }), 1500);
+    }), 500);
     
   }
 }

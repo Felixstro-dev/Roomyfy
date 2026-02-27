@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <style>
+    body {
+      font-family: 'monospace', monospace;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background:#000000;
+      margin: 0;
+    }
+
+    .login-box {
+      background: #000000;
+      padding: 40px;
+      border-radius: 15px;
+      width: 350px;
+      text-align: center;
+    }
+
+    .login-box h2 {
+      margin-bottom: 30px;
+      color: #49bb79;
+    }
+
+    .login-box input,
+    .login-box button {
+      width: 100%;
+      padding: 15px;
+      font-size: 18px;
+      border-radius: 8px;
+      border: 1px solid #49bb79;
+      background-color: #000000;
+      color: #49bb79;
+      box-sizing: border-box;
+    }
+
+    input:focus {
+      outline: none;
+    }
+
+    button:hover {
+      background-color: #1c2921;
+    }
+
+    .error {
+      color: #49bb79;
+      margin-top: 15px;
+    }
+
+    .console {
+      color: #49bb79;
+    }
+
+    p {
+      color: #424242;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-box" id="loginbox">
+    
+    <input style="margin-bottom: 1rem;" placeholder="Pin" type="password" id="pin">
+    <button style="margin-bottom: 1rem;" onclick="reset()">Clear</button>
+    <button onclick="login()">Login</button>
+    <p class="error" id="error"></p>
+    <p style="font-size: 12px;">Roomyfy v1.1.2</p>
+  </div>
+
+  <div class="console" style="align-items: center; text-align: center;" id="consolecontainer">
+    <span id="console1"></span><br>
+    <span id="console2"></span>
+    <span>_</span>
+  </div>
+
+<script>
+const pin = document.getElementById('pin');
+const error = document.getElementById('error');
+const loginbox = document.getElementById('loginbox')
+const consolet1 = document.getElementById('console1')
+const consolet2 = document.getElementById('console2')
+const consolec = document.getElementById('consolecontainer')
+const text1 = "Welcome...";
+const text2 = "Please enter your pin to log in...";
+let index1 = 0;
+let index2 = 0;
+
+function login() {
+  if (!pin.value) {
+    error.textContent = "Enter a password";
+    return;
+  }
+
+  window.location.href = "chat.html";
+  document.cookie = `auth=${pin.value}; max-age=600; path=/`;
+}
+
+loginbox.style.display = "none"
+
+function type1() {
+  if (index1 < text1.length) {
+    consolet1.textContent += text1[index1];
+    index1++;
+    setTimeout(type1, 100);
+  } else {
+    setTimeout(type2, 500);
+  }
+}
+
+function type2() {
+  if (index2 < text2.length) {
+    console2.textContent += text2[index2];
+    index2++;
+    setTimeout(type2, 100);
+  } else {
+    setTimeout((() => {
+      loginbox.style.display = "block"
+      consolec.style.display = "none"
+    }), 1500);
+    
+  }
+}
+
+type1();
+</script>
+
+</body>
+</html>

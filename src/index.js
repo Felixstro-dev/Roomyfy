@@ -12,7 +12,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const protectionEnabled = process.env.ENABLE_PROTECTION || "false";
-
+export const customFrontendEnabled = process.env.ENABLE_CUSTOM_FRONTEND || "false";
+export const customFrontendPath = process.env.CUSTOM_FRONTEND_PATH || "custom-frontend";
 export const commandsEnabled = process.env.ENABLE_COMMANDS || "true";
 
 const allowedPasswords = (process.env.PROTECTION_PASSWORDS || "")
@@ -52,8 +53,12 @@ function middleware(req, res, next) {
 app.use(cookieParser());
 app.use(middleware);
 
-app.use(express.static(path.join(__dirname, "public")))
 
+if (customFrontendEnabled == "true") {
+    app.use(express.static(path.join(__dirname, customFrontendPath)))
+} else {
+    app.use(express.static(path.join(__dirname, "frontend")))
+}
 const expressServer = app.listen(PORT, () => {
     console.log(`listening on port ${PORT}`)
 })
@@ -68,7 +73,7 @@ const UsersState = {
 
 export const io = new Server(expressServer, {
     cors: {
-        origin: process.env.NODE_ENV === "production" ? false : ["http://localhost:5500", "http://127.0.0.1:5500"]
+        origin: process.env.NODE_ENV === "production" ? false : [`http://localhost:${PORT}`, `http://127.0.0.1:${PORT}`]
     }
 })
 

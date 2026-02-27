@@ -29,7 +29,7 @@ export function runCommand(cmd, room, socket) {
     } else if (command == '/!catblink') {
         io.to(room).emit('message', buildMsg('Cat', '<img height="75px" width="256px" src="https://media1.tenor.com/m/y1QFa-1vyKYAAAAC/plink-wide-cat.gif">'));
     } else if (command == '/!github') {
-        socket.emit('message', buildMsg('COMMANDS', "Check out the project's github page! <a target='_blank' href='https://github.com/Felixstro-dev/Roomyfy'>github.com/Felixstro-dev/Roomyfy</a><span class='small'>only you can see this</span>"));
+        socket.emit('message', buildMsg('COMMANDS', "Check out the project's github page! <a target='_blank' href='https://github.com/Felixstro-dev/vanishtxt'>github.com/Felixstro-dev/vanishtxt</a><span class='small'>only you can see this</span>"));
     } else if (command == '/!dm') {
         if (args.length < 2) {
             socket.emit('message', buildMsg('COMMANDS', 'Usage: /!dm &lt;username&gt; &lt;message&gt;<br><span class="small">only you can see this</span>'));
