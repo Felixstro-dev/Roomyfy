@@ -5,6 +5,7 @@ import { createRequire } from 'module';
 import { fileURLToPath } from 'url'
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
+import { Readable } from "stream";
 import { runCommand } from './commands.js';
 import { validateName, getUsersInRoom, getUser, userLeavesApp, activateUser, customLog } from './utilities.js';
 
@@ -17,6 +18,7 @@ const pkg = require("../package.json");
 
 const protectionEnabled = process.env.ENABLE_PROTECTION || "false";
 export const customFrontendEnabled = process.env.ENABLE_CUSTOM_FRONTEND || "false";
+export const customFrontendType = process.env.CUSTOM_FRONTEND_TYPE || "path";
 export const customFrontendPath = process.env.CUSTOM_FRONTEND_PATH || "custom-frontend";
 export const commandsEnabled = process.env.ENABLE_COMMANDS || "true";
 
@@ -77,6 +79,7 @@ const expressServer = app.listen(PORT, () => {
     \x1b[38;5;7m│ \x1b[0m Listening on \x1b[38;5;93mhttp://0.0.0.0:${PORT}\x1b[0m                    \x1b[38;5;7m│
     \x1b[38;5;7m╰──────────────────────────────────────────────────────╯`;
     console.log(message2)
+    if (customFrontendType == "url") customLog('\x1b[38;5;1mUsing the custom frontend type "url" is experimental and not recommended!', true, false, "    ");
 })
 
 // state 
@@ -92,6 +95,34 @@ export const io = new Server(expressServer, {
         origin: process.env.NODE_ENV === "production" ? false : [`http://localhost:${PORT}`, `http://127.0.0.1:${PORT}`]
     }
 })
+
+if (customFrontendType == "url" && customFrontendPath) {
+    app.get("/*", async (req, res) => {
+    const filePath = req.params[0];
+
+    const response = await fetch(
+        `${customFrontendPath}/${filePath}`
+    );
+
+    res.status(response.status);
+
+    if (filePath.toLowerCase().endsWith(".html")) {
+        res.setHeader("Content-Type", "text/html");
+    } else {
+        const contentType = response.headers.get("content-type");
+        if (contentType) {
+        res.setHeader("Content-Type", contentType);
+        }
+    }
+
+    if (response.body) {
+        Readable.fromWeb(response.body).pipe(res);
+    } else {
+        res.end();
+    }
+    });
+}
+
 
 io.on('connection', socket => {
     customLog(`A user connected...`, false, false, "    ")

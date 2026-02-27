@@ -57,4 +57,5 @@ npm install #just to be safe
 | NODE_ENV             | string | -   | if "production" all cross-origin requests are denied 
 | ENABLE_RECONNECT     | boolean | false  | Automatically reconnect to the last room on connection/disconnect (only supported on some frontends)
 | ENABLE_CUSTOM_FRONTEND | boolean | false | Toggle the custom frontends feature |
-| CUSTOM_FRONTEND_PATH | string | ./src/custom-frontend/ | Changes the path that gets served when the custom frontends feature is enabled |
+| CUSTOM_FRONTEND_PATH | string | ./src/custom-frontend/ (can be a url in combo with CUSTOM_FRONTEND_TYPE=url) | Changes the path that gets served when the custom frontends feature is enabled |
+| CUSTOM_FRONTEND_TYPE | string | path | EXPERIMENTAL! Switch between locally stored custom frontends and custom frontends hosted on the internet |
