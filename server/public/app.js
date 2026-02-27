@@ -159,16 +159,17 @@ socket.on("message", (data) => {
 });
 
 function linkifyText(container, rawText) {
+    const normalizedText = rawText.replace(/<br\s*\/?>/gi, '\n');
     const urlRegex = /(https?:\/\/[^\s]+)(?=\s|$)/g;
     let lastIndex = 0;
     let match;
 
-    while ((match = urlRegex.exec(rawText)) !== null) {
+    while ((match = urlRegex.exec(normalizedText)) !== null) {
         const matchStart = match.index;
         const matchEnd = match.index + match[0].length;
 
         if (matchStart > lastIndex) {
-            container.appendChild(document.createTextNode(rawText.slice(lastIndex, matchStart)));
+            appendTextWithLineBreaks(container, normalizedText.slice(lastIndex, matchStart));
         }
 
         const link = document.createElement('a');
@@ -181,9 +182,21 @@ function linkifyText(container, rawText) {
         lastIndex = matchEnd;
     }
 
-    if (lastIndex < rawText.length) {
-        container.appendChild(document.createTextNode(rawText.slice(lastIndex)));
+    if (lastIndex < normalizedText.length) {
+        appendTextWithLineBreaks(container, normalizedText.slice(lastIndex));
     }
+}
+
+function appendTextWithLineBreaks(container, text) {
+    const parts = text.split('\n');
+    parts.forEach((part, index) => {
+        if (part) {
+            container.appendChild(document.createTextNode(part));
+        }
+        if (index < parts.length - 1) {
+            container.appendChild(document.createElement('br'));
+        }
+    });
 }
 
 
