@@ -10,6 +10,9 @@ Websocket-based, anonymous and open source chatroom site.
 
 Instance status: https://status.chjk.xyz/status/roomyfy
 
+>  **IMPORTANT**
+>
+>  Please update your instance's install or run script if your instance is on version 1.2.0 or later due to a change in the file structure.
 ## Setting up your own instance:
 
 ### Requirements: 
@@ -18,12 +21,22 @@ Instance status: https://status.chjk.xyz/status/roomyfy
 - git
 
 ### Linux / MacOS:
+Install:
 ```
-git clone https://github.com/Felixstro-dev/Roomyfy.git
-cd Roomyfy
-cd server
+git clone https://github.com/Felixstro-dev/vanishtxt.git
+cd vanishtxt
 npm install
+```
+Start:
+```
+cd /path/to/your/install
 npm run main
+```
+Update:
+```
+cd /path/to/your/install
+git pull
+npm install #just to be safe
 ```
 
 ### Windows:
@@ -40,4 +53,6 @@ in /server
 | ENABLE_IMAGES        | boolean | true   | Enable image sharing    |
 | ENABLE_COMMANDS       | boolean | true   | Enable "/!" commands    |
 | NODE_ENV             | string | -   | if "production" all cross-origin requests are denied 
-| ENABLE_RECONNECT     | boolean | false  | Automatically reconnect to the last room on connection/disconnect
+| ENABLE_RECONNECT     | boolean | false  | Automatically reconnect to the last room on connection/disconnect (only supported on some frontends)
+| ENABLE_CUSTOM_FRONTEND | boolean | false | Toggle the custom frontends feature |
+| CUSTOM_FRONTEND_PATH | string | ./src/custom-frontend/ | Changes the path that gets served when the custom frontends feature is enabled |
